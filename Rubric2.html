@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS Evaluation Rubric</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 20px;
+            background-color: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: transparent;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        thead th {
+            background-color: transparent;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 2px solid #333;
+        }
+        tbody tr:not(.add-criterion-row):not(.add-category-row):hover {
+            background-color: #f5f5f5;
+        }
+        .category-header th {
+            background-color: transparent;
+            color: #212529;
+            text-align: left;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 16px 12px 4px 12px;
+            border-top: 2px solid #999;
+            border-bottom: 1px solid #ccc;
+            position: relative;
+        }
+        .category-description {
+            font-size: 0.9em;
+            font-weight: normal;
+            color: #555;
+            padding-top: 4px;
+        }
+        .total-row th, .total-row td {
+            font-weight: bold;
+            background-color: transparent;
+            border-top: 2px solid #333;
+        }
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .save-btn { background-color: #6c757d; }
+        .save-btn:hover:not(:disabled) { background-color: #5a6268; }
+        
+        .add-btn {
+            background-color: #28a745;
+            font-size: 0.9em;
+            padding: 6px 12px;
+        }
+        .add-btn:hover {
+             background-color: #218838;
+        }
+        .remove-btn {
+            background-color: transparent;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 26px;
+            text-align: center;
+            box-shadow: none;
+            transition: all 0.2s;
+        }
+        .remove-btn:hover {
+             background-color: #dc3545;
+             color: white;
+        }
+        .remove-category-btn {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+        }
+        .actions-col {
+            width: 60px;
+            text-align: center !important;
+        }
+        .actions-header-legend {
+            font-weight: normal;
+            font-size: 0.8em;
+            display: block;
+        }
+        .actions-header-legend .remove-legend {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        td input[type="number"], td input[type="text"], td select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        th input.header-input, th input.category-title-input {
+            width: 100%;
+            border: none;
+            background-color: transparent;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: center;
+            padding: 6px;
+        }
+        th input.category-title-input {
+            font-size: 1.1em;
+            text-align: left;
+            padding: 0;
+            margin-bottom: 4px;
+        }
+        .category-description-input {
+            width: 100%;
+            border: none;
+            font-size: 0.9em;
+            font-weight: normal;
+            color: #555;
+            padding: 0;
+            background: transparent;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-container { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ff9800; /* Orange for Rigorous */ transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; transform: translateX(26px); /* Default position is right (Rigorous) */ }
+        input:checked + .slider { background-color: #4CAF50; /* Green for Quick Score */ }
+        input:checked + .slider:before { transform: translateX(0px); /* Move left for Quick Score */ }
+        
+        #resultMessage {
+            display: none;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 80%;
+            text-align: center;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        #resultMessage.success { border: 2px solid #28a745; background-color: #e9f7ef; color: #155724; }
+        #resultMessage.opportunity { border: 2px solid #ffc107; background-color: #fff8e1; color: #856404; }
+        
+        /* Toast Notification Styles */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            position: fixed;
+            z-index: 10;
+            left: 50%;
+            bottom: 30px;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s, bottom 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        #toast button {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-left: 20px;
+            box-shadow: none;
+        }
+        #toast button:hover {
+            background-color: #e0a800;
+        }
+
+        /* Helper Class for Visibility */
+        .hidden { display: none !important; }
+
+        @media print {
+            body { margin: 0; font-size: 10pt; }
+            h1 { font-size: 18pt; }
+            .no-print { display: none !important; }
+            table { width: 100%; page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            input, select { border: none !important; box-shadow: none !important; padding: 2px; background-color: transparent !important; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+            select { padding-right: 0; }
+            select option:not(:checked) { display: none; }
+        }
+    </style>
+</head>
+<body onload="initialize()">
+
+    <h1>LMS Evaluation Rubric</h1>
+
+    <div class="controls-container no-print">
+        <div class="toggle-container">
+            <span>Quick Scoring</span>
+            <label class="switch">
+                <input type="checkbox" id="scoringToggle" onchange="toggleScoringMode()">
+                <span class="slider"></span>
+            </label>
+            <span>Rigorous Scoring</span>
+        </div>
+        <button onclick="calculateScores()">Calculate Scores</button>
+        <button onclick="saveAsPDF()" class="save-btn">Save as PDF</button>
+    </div>
+    
+    <table id="rubricTable">
+        <thead>
+            <tr>
+                <th><input type="text" class="header-input" value="Enter LMS Name Here"></th>
+                <th class="weight-col"></th>
+                <th></th>
+                <th></th>
+                <th class="no-print"></th>
+            </tr>
+            <tr>
+                <th>Specific Feature/Criterion</th>
+                <th class="weight-col" id="weight-header">Weight (1-5)</th>
+                <th class="score-header" id="score-header">Score (1-5)</th>
+                <th id="notes-header">Notes/Comments</th>
+                <th class="no-print actions-col">
+                    Actions
+                    <span class="actions-header-legend">(<span class="remove-legend">X</span> = Remove)</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="category-group">
+            <tr class="category-header">
+                <th colspan="5" class="category-colspan">
+                    Ease of Use
+                    <div class="category-description">The LMS interface adapts to the device's layout to facilitate usability, navigation and interaction. The content can be viewed on a tablet, phone, or resized browser without losing functionality.</div>
+                    <button class="remove-btn remove-category-btn no-print" onclick="removeCategory(this)">X</button>
+                </th>
+            </tr>
+            <tr>
+                <td>For Students</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Is the student interface intuitive?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr>
+                <td>For Teachers</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="How easy is it to set up new courses?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+             <tr>
+                <td>For Teachers to Share and Update Courses</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Can course components be easily copied/updated?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr>
+                <td>Easy to use applications on iOS and Android for all stakeholders (students, teachers, and parents/guardians)</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Are dedicated mobile apps fully functional?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr>
+                <td>Easy to use grade passback from LMS to SIS</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Is data sync automated and reliable?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr class="add-criterion-row no-print"><td colspan="5" class="category-colspan" style="text-align: center;"><button class="add-btn" onclick="addCriterion(this)">+ Add Criterion</button></td></tr>
+        </tbody>
+        <tbody class="category-group">
+            <tr class="category-header">
+                <th colspan="5" class="category-colspan">
+                    User Interface
+                    <div class="category-description">The LMS interface is clean, modern and has an attractive design.</div>
+                    <button class="remove-btn remove-category-btn no-print" onclick="removeCategory(this)">X</button>
+                </th>
+            </tr>
+            <tr>
+                <td>Intuitive Navigation</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Can users quickly find core tools?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr>
+                <td>Adaptable for Various Use Cases</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Can the UI be customized for different departments?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr>
+                <td>Ease of Sharing Materials (Central Repository, Versioning)</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="How easy is it to share content across courses/instructors?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr>
+                <td>Ease of Using Shared Materials (Drag-and-Drop, Repurposing)</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="How simple is it to add shared materials into a new course layout?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr class="add-criterion-row no-print"><td colspan="5" class="category-colspan" style="text-align: center;"><button class="add-btn" onclick="addCriterion(this)">+ Add Criterion</button></td></tr>
+        </tbody>
+        <tbody class="category-group">
+            <tr class="category-header">
+                <th colspan="5" class="category-colspan">
+                    Admin Ability and Reporting
+                    <div class="category-description">LMS provides high level content sharing capabilities, accessible and actionable data.</div>
+                    <button class="remove-btn remove-category-btn no-print" onclick="removeCategory(this)">X</button>
+                </th>
+            </tr>
+             <tr>
+                <td>Ability for Admin to Disseminate and share HQIM (High Quality Instructional Materials)</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Can administrators push content updates easily?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+             <tr>
+                <td>Data Availability (within the Interface)</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Are detailed analytics accessible to instructors/admins?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+             <tr>
+                <td>Interoperability with Other Tools</td>
+                <td class="weight-col"><input type="number" min="1" max="5"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input">
+                    <select class="quick-input hidden">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td class="notes-cell"><input type="text" placeholder="Does it support LTI/API for third-party tools?"></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            </tr>
+            <tr class="add-criterion-row no-print"><td colspan="5" class="category-colspan" style="text-align: center;"><button class="add-btn" onclick="addCriterion(this)">+ Add Criterion</button></td></tr>
+        </tbody>
+        <tbody class="add-category-row-container no-print">
+             <tr class="add-category-row"><td colspan="5" class="category-colspan" style="text-align: center; padding: 20px;"><button class="add-btn" style="background-color: #17a2b8;" onclick="addCategory()">+ Add Feature Category</button></td></tr>
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <th>Total Score</th>
+                <td class="weight-col"></td>
+                <td id="lms-total">0</td>
+                <td></td>
+                <td class="no-print"></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div id="resultMessage"></div>
+    <div id="toast" class="no-print"></div>
+
+
+    <script>
+        let isQuickScoring = false;
+        let lastRemoved = { element: null, parent: null, nextSibling: null };
+        let toastTimer;
+
+        function initialize() {
+            // Check the current state of the toggle on load
+            const scoringToggle = document.getElementById('scoringToggle');
+            isQuickScoring = scoringToggle.checked;
+            toggleScoringMode(true); // Call once to set initial state
+        }
+
+        function saveAsPDF() {
+            window.print();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            clearTimeout(toastTimer);
+            
+            // Basic toast/undo logic (kept minimal for HTML file size)
+            toast.innerHTML = `<span>${message}</span> <button onclick="undoRemove()">Undo</button>`;
+            toast.className = "show";
+            
+            toastTimer = setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+                lastRemoved = { element: null, parent: null, nextSibling: null };
+            }, 5000);
+        }
+
+        function undoRemove() {
+            // Restore logic (kept minimal for HTML file size)
+            if (!lastRemoved.element) return;
+            lastRemoved.parent.insertBefore(lastRemoved.element, lastRemoved.nextSibling);
+            document.getElementById('toast').className = "";
+            lastRemoved = { element: null, parent: null, nextSibling: null };
+        }
+
+        function toggleScoringMode(initialLoad = false) {
+            const toggle = document.getElementById('scoringToggle');
+            if (!initialLoad) {
+                isQuickScoring = toggle.checked;
+            }
+            
+            // Header Elements
+            const weightHeader = document.getElementById('weight-header');
+            const scoreHeader = document.getElementById('score-header');
+
+            // Class Collections
+            const weightCols = document.querySelectorAll('.weight-col');
+            const rigorousInputs = document.querySelectorAll('.rigorous-input');
+            const quickInputs = document.querySelectorAll('.quick-input');
+            const colspans = document.querySelectorAll('.category-colspan');
+            
+            // --- Toggle Visibility & Header Content ---
+            
+            if (isQuickScoring) {
+                // --- QUICK MODE ---
+                // 1. Hide Weight Column
+                weightCols.forEach(el => el.classList.add('hidden'));
+                
+                // 2. Adjust Colspan (4 columns visible)
+                colspans.forEach(el => el.colSpan = 4);
+                
+                // 3. Update Headers and Swap Inputs
+                scoreHeader.innerText = 'Quick Score (1-3)';
+                weightHeader.classList.add('hidden'); // Hide the Weight header text cell
+                
+                rigorousInputs.forEach(el => el.classList.add('hidden'));
+                quickInputs.forEach(el => el.classList.remove('hidden'));
+                
+            } else {
+                // --- RIGOROUS MODE ---
+                // 1. Show Weight Column
+                weightCols.forEach(el => el.classList.remove('hidden'));
+                
+                // 2. Adjust Colspan (5 columns visible)
+                colspans.forEach(el => el.colSpan = 5);
+
+                // 3. Update Headers and Swap Inputs
+                scoreHeader.innerText = 'Score (1-5)';
+                weightHeader.classList.remove('hidden'); // Show Weight header text cell
+                
+                rigorousInputs.forEach(el => el.classList.remove('hidden'));
+                quickInputs.forEach(el => el.classList.add('hidden'));
+            }
+        }
+        
+        function removeCriterion(buttonElement) {
+            const rowToRemove = buttonElement.closest('tr');
+            lastRemoved.element = rowToRemove;
+            lastRemoved.parent = rowToRemove.parentNode;
+            lastRemoved.nextSibling = rowToRemove.nextElementSibling;
+            rowToRemove.remove();
+            showToast('Criterion removed.');
+        }
+
+        function removeCategory(buttonElement) {
+            const tbodyToRemove = buttonElement.closest('tbody');
+            lastRemoved.element = tbodyToRemove;
+            lastRemoved.parent = tbodyToRemove.parentNode;
+            lastRemoved.nextSibling = tbodyToRemove.nextElementSibling;
+            tbodyToRemove.remove();
+            showToast('Category removed.');
+        }
+
+        function addCriterion(buttonElement) {
+            const parentRow = buttonElement.closest('tr');
+            const newRow = document.createElement('tr');
+            
+            const weightDisplay = isQuickScoring ? 'hidden' : '';
+            const rigClass = isQuickScoring ? 'hidden' : '';
+            const quickClass = isQuickScoring ? '' : 'hidden';
+
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Enter new criterion..."></td>
+                <td class="weight-col ${weightDisplay}"><input type="number" min="1" max="5" class="weight-input"></td>
+                <td class="score-cell">
+                    <input type="number" min="1" max="5" class="rigorous-input ${rigClass}">
+                    <select class="quick-input ${quickClass}">
+                        <option value="0" selected>N/A</option>
+                        <option value="1">Not Really</option>
+                        <option value="2">Kind of</option>
+                        <option value="3">Definitely</option>
+                    </select>
+                </td>
+                <td><input type="text" placeholder="Enter notes..."></td>
+                <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+            `;
+            parentRow.parentNode.insertBefore(newRow, parentRow);
+        }
+
+        function addCategory() {
+            const table = document.getElementById('rubricTable');
+            const addCategoryContainer = table.querySelector('.add-category-row-container');
+            const newTbody = document.createElement('tbody');
+            newTbody.className = 'category-group';
+            
+            const colSpan = isQuickScoring ? 4 : 5;
+            const weightDisplay = isQuickScoring ? 'hidden' : '';
+            const rigClass = isQuickScoring ? 'hidden' : '';
+            const quickClass = isQuickScoring ? '' : 'hidden';
+
+            newTbody.innerHTML = `
+                <tr class="category-header">
+                    <th colspan="${colSpan}" class="category-colspan">
+                        <div><input type="text" class="category-title-input" value="New Feature Category"></div>
+                        <div class="category-description"><input type="text" class="category-description-input" placeholder="Enter category description..."></div>
+                        <button class="remove-btn remove-category-btn no-print" onclick="removeCategory(this)">X</button>
+                    </th>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Enter new criterion..."></td>
+                    <td class="weight-col ${weightDisplay}"><input type="number" min="1" max="5" class="weight-input"></td>
+                    <td class="score-cell">
+                        <input type="number" min="1" max="5" class="rigorous-input ${rigClass}">
+                        <select class="quick-input ${quickClass}">
+                            <option value="0" selected>N/A</option>
+                            <option value="1">Not Really</option>
+                            <option value="2">Kind of</option>
+                            <option value="3">Definitely</option>
+                        </select>
+                    </td>
+                    <td><input type="text" placeholder="Enter notes..."></td>
+                    <td class="no-print actions-col"><button class="remove-btn" onclick="removeCriterion(this)">X</button></td>
+                </tr>
+                <tr class="add-criterion-row no-print">
+                    <td colspan="${colSpan}" class="category-colspan" style="text-align: center;"><button class="add-btn" onclick="addCriterion(this)">+ Add Criterion</button></td>
+                </tr>
+            `;
+            
+            table.insertBefore(newTbody, addCategoryContainer);
+        }
+
+        function calculateScores() {
+            const table = document.getElementById('rubricTable');
+            const rows = table.querySelectorAll('tbody.category-group tr:not(.category-header):not(.add-criterion-row)');
+            const totalDisplay = document.getElementById('lms-total');
+            const resultDiv = document.getElementById('resultMessage');
+            
+            let totalScore = 0;
+            let maxPossibleScore = 0;
+
+            rows.forEach(row => {
+                let score = 0;
+                let weight = 0;
+
+                if (isQuickScoring) {
+                    const select = row.querySelector('.quick-input');
+                    score = select ? parseInt(select.value) : 0;
+                    if (score > 0) {
+                        totalScore += score;
+                        maxPossibleScore += 3;
+                    }
+                } else {
+                    const weightInput = row.querySelector('.weight-col input');
+                    const scoreInput = row.querySelector('.rigorous-input');
+                    weight = weightInput ? (parseInt(weightInput.value) || 0) : 0;
+                    score = scoreInput ? (parseInt(scoreInput.value) || 0) : 0;
+                    
+                    if (weight > 0 && score > 0) {
+                        totalScore += (weight * score);
+                        maxPossibleScore += (weight * 5);
+                    }
+                }
+            });
+
+            totalDisplay.innerText = totalScore;
+            
+            if (maxPossibleScore === 0) {
+                resultDiv.style.display = 'none';
+                totalDisplay.innerText = 0;
+                return;
+            }
+
+            const percentage = (totalScore / maxPossibleScore) * 100;
+            
+            if (percentage >= 90) {
+                resultDiv.innerHTML = "We're so glad your LMS is working so well! If you ever need anything about evaluating your LMS, please don't hesitate to reach out.";
+                resultDiv.className = 'success';
+            } else {
+                resultDiv.innerHTML = "It looks like there is an opportunity to evaluate your LMS further. If you're interested in speaking with your account representative, please find their information and more below!";
+                resultDiv.className = 'opportunity';
+            }
+            resultDiv.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>
